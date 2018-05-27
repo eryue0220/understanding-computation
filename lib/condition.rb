@@ -8,6 +8,10 @@ class LessThan < Struct.new(:left, :right)
     "#{left} < #{right}"
   end
 
+  def to_ruby
+    "-> e { (#{left.to_ruby}).call(e) < (#{right.to_ruby}).call(e) }"
+  end
+
   def inspect
     "<#{self}>"
   end
@@ -22,14 +26,26 @@ class LessThan < Struct.new(:left, :right)
     elsif right.reducible?
       LessThan.new(left, right.reduce(environment))
     else
-      Boolean.new(left.value < right.value)
+      Boolean.new(
+        left.evaluate(environment).value < right.evaluate(environment).value
+      )
     end
+  end
+
+  def evaluate(environment)
+    Boolean.new(
+      left.evaluate(environment).value < right.evaluate(environment).value
+    )
   end
 end
 
 class GreaterThan < Struct.new(:left, :right)
   def to_s
     "#{left} > #{right}"
+  end
+
+  def to_ruby
+    "-> e { (#{left.to_ruby}).call(e) > (#{right.to_ruby}).call(e) }"
   end
 
   def inspect
@@ -49,6 +65,12 @@ class GreaterThan < Struct.new(:left, :right)
       Boolean.new(left.value > right.value)
     end
   end
+
+  def evaluate(environment)
+    Boolean.new(
+      left.evaluate(environment).value > right.evaluate(environment).value
+    )
+  end
 end
 
 class If < Struct.new(:condition, :consequence, :alternative)
@@ -56,6 +78,12 @@ class If < Struct.new(:condition, :consequence, :alternative)
     "if (#{condition}) { #{consequence} } else { #{alternative} }"
   end
 
+  def to_ruby
+    "-> e { if (#{condition.to_ruby}).call(e)" +
+    "then (#{consequence.to_ruby}).call(e)" +
+    "else (#{alternative.to_ruby}).call(e)" +
+    "end }"
+  end
   def inspect
     "<#{self}>"
   end
@@ -74,6 +102,15 @@ class If < Struct.new(:condition, :consequence, :alternative)
       when Boolean.new(false)
         [alternative, environment]
       end
+    end
+  end
+
+  def evaluate(environment)
+    case condition.evaluate(environment)
+    when Boolean.new(true)
+      consequence.evaluate(environment)
+    when Boolean.new(false)
+      alternative.evaluate(environment)
     end
   end
 end

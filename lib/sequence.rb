@@ -12,6 +12,10 @@ class Sequence < Struct.new(:first, :second)
     "<#{self}>"
   end
 
+  def to_ruby
+    "-> e { (#{second.to_ruby}).call((#{first.to_ruby}).call(e)) }"
+  end
+
   def reducible?
     true
   end
@@ -24,5 +28,9 @@ class Sequence < Struct.new(:first, :second)
       reduced_first, reduced_environment = first.reduce(environment)
       [Sequence.new(reduced_first, second), reduced_environment]
     end
+  end
+
+  def evaluate(environment)
+    secod.evaluate(first.evaluate(environment))
   end
 end

@@ -8,6 +8,10 @@ class Add < Struct.new(:left, :right)
     "#{left} + #{right}"
   end
 
+  def to_ruby
+    "-> e { (#{left.to_ruby}).call(e) + (#{right.to_ruby}).call(e) }"
+  end
+
   def inspect
     "<#{self}>"
   end
@@ -25,11 +29,21 @@ class Add < Struct.new(:left, :right)
       Number.new(left.value + right.value)
     end
   end
+
+  def evaluate(environment)
+    Number.new(
+      left.evaluate(environment).value + right.evaluate(environment).value
+    )
+  end
 end
 
 class Sub < Struct.new(:left, :right)
   def to_s
     "#{left} - #{right}"
+  end
+
+  def to_ruby
+    "-> e { (#{left.to_ruby}).call(e) - (#{right.to_ruby}).call(e) }"
   end
 
   def inspec
@@ -49,11 +63,21 @@ class Sub < Struct.new(:left, :right)
       Number.new(left.value - right.value)
     end
   end
+
+  def evaluate(environment)
+    Number.new(
+      left.evaluate(environment).value - right.evaluate(environment).value
+    )
+  end
 end
 
 class Multiply < Struct.new(:left, :right)
   def to_s
     "#{left} * #{right}"
+  end
+
+  def to_ruby
+    "-> e { (#{left.to_ruby}).call(e) * (#{right.to_ruby}).call(e) }"
   end
 
   def inspect
@@ -72,6 +96,12 @@ class Multiply < Struct.new(:left, :right)
     else
       Number.new(left.value * right.value)
     end
+  end
+
+  def evaluate(environment)
+    Number.new(
+      left.evaluate(environment).value * right.evaluate(environment).value
+    )
   end
 end
 
@@ -94,5 +124,9 @@ class Assign < Struct.new(:name, :expression)
     else
       [DoNothing.new, environment.merge({ name => expression })]
     end
+  end
+
+  def evaluate(environment)
+    environment.merge({ name => expression.evaluate(environment) })
   end
 end
