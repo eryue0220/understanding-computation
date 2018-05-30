@@ -1,12 +1,12 @@
 #!/usr/bin/env ruby
 
-class Boolean < Struct.new(:value)
+ class DoNothing
   def to_ruby
-    " -> e { #{value} }"
+    "-> e { e }"
   end
 
   def to_s
-    value.to_s
+    "do-nothing"
   end
 
   def inspect
