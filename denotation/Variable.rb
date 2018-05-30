@@ -1,12 +1,12 @@
 #!/usr/bin/env ruby
 
-class Boolean < Struct.new(:value)
+class Variable < Struct.new(:name)
   def to_ruby
-    " -> e { #{value} }"
+    "-> e { e[#{name.inspect}] }"
   end
 
   def to_s
-    value.to_s
+    name.to_s
   end
 
   def inspect
