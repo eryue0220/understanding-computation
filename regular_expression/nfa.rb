@@ -61,23 +61,7 @@ class NFAGenerator < Struct.new(:start_state, :accept_states, :rule)
     NFA.new(Set[start_state], accept_states, rule)
   end
 
-  def accpets?(string)
+  def accepts?(string)
     to_nfa.tap { |nfa| nfa.read_string(string) }.accepts?
   end
 end
-
-rule = NFARule.new([
-  FARule.new(1, nil, 2),
-  FARule.new(1, nil, 4),
-  FARule.new(2, 'a', 3),
-  FARule.new(3, 'a', 2),
-  FARule.new(4, 'a', 5),
-  FARule.new(5, 'a', 6),
-  FARule.new(6, 'a', 4)
-])
-
-puts rule.follow_free_move(Set[1])
-
-nfa = NFAGenerator.new(1, [2, 4], rule)
-puts nfa.accpets?('aaa')
-puts nfa.accpets?('aaaaa')
