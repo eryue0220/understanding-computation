@@ -57,11 +57,19 @@ class NFA < Struct.new(:current_states, :accept_states, :rule)
 end
 
 class NFAGenerator < Struct.new(:start_state, :accept_states, :rule)
-  def to_nfa
-    NFA.new(Set[start_state], accept_states, rule)
+  def to_nfa(current_states = Set[start_state])
+    NFA.new(current_states, accept_states, rule)
   end
 
   def accepts?(string)
     to_nfa.tap { |nfa| nfa.read_string(string) }.accepts?
+  end
+end
+
+class NFASimulation < Struct.new(:nfa_generator)
+  def next_state(state, character)
+    nfa_generator.to_nfa(state).tap { |nfa|
+      nfa.read_character(character)
+    }.current_states
   end
 end

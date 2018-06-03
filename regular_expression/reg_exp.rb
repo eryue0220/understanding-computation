@@ -96,6 +96,20 @@ class Choose < Struct.new(:first, :second)
   def precedence
     0
   end
+
+  def to_nfa
+    first_nfa = first.to_nfa
+    second_nfa = second.to_nfa
+    start_state = Object.new
+    accept_states = first_nfa.accept_states + second_nfa.accept_states
+    rules = first_nfa.rule.rules + second_nfa.rule.rules
+    extra_rules = [first_nfa, second_nfa].map { |nfa|
+      FARule.new(start_state, nil, nfa.start_state)
+    }
+    rulebook = NFARule.new(rules + extra_rules)
+
+    NFAGenerator.new(start_state, accept_states, rulebook)
+  end
 end
 
 class Repeat < Struct.new(:pattern)
@@ -107,6 +121,19 @@ class Repeat < Struct.new(:pattern)
 
   def precedence
     2
+  end
+
+  def to_nfa
+    pattern_nfa = pattern.to_nfa
+    start_state = Object.new
+    accept_states = pattern_nfa.accept_states + [start_state]
+    rules = pattern_nfa.rule.rules
+    extra_rules = pattern_nfa.accept_states.map { |accept_state|
+      FARule.new(accept_state, nil, pattern_nfa.start_state)
+    } +
+    [FARule.new(start_state, nil, pattern_nfa.start_state)]
+    rulebook = NFARule.new(rules + extra_rules)
+    NFAGenerator.new(start_state, accept_states, rulebook)
   end
 end
 
@@ -142,3 +169,14 @@ puts Concatenate.new(
     Literal.new('c')
   )
 ).match?('abc')
+
+pattern = Choose.new(Literal.new('a'), Literal.new('b'))
+puts pattern.match?('a')
+puts pattern.match?('b')
+puts pattern.match?('c')
+
+pattern = Repeat.new(Literal.new('a'))
+puts pattern.match?('')
+puts pattern.match?('a')
+puts pattern.match?('aaa')
+puts pattern.match?('abbb')
