@@ -17,9 +17,3 @@ class Stack < Struct.new(:contents)
     "#<Stack (#{top})#{contents.drop(1).join}>"
   end
 end
-
-stack = Stack.new(['a', 'b', 'c', 'd', 'e', 'f'])
-puts stack
-
-stack = Stack.new(['$']).push('x').push('y').push('z')
-puts stack.top

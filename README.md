@@ -1,2 +1,5 @@
 # understanding-computation
-Ruby
+
+Ruby Implementation
+
+JavaScript Implementation
